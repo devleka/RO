@@ -123,20 +123,20 @@ export default function TransportGraph({ allocation, costs, u, v }) {
       for (let j = 0; j < dest; j++) {
         let allocValue = allocation[i][j];
 
-        if (allocValue > 0) {
+        if (allocValue === "EPS" || allocValue > 0) {
           const x1 = leftX + 10;
           const y1 = topY + i * stepY;
           const x2 = rightX - 10;
           const y2 = topY + j * stepY;
-          
+
           // Calculate midpoint for label positioning
           const midX = (x1 + x2) / 2;
           const midY = (y1 + y2) / 2;
-          
+
           // Calculate angle for perpendicular offset
           const angle = Math.atan2(y2 - y1, x2 - x1);
           const offset = 8; // Perpendicular offset in pixels
-          
+
           // Offset label position perpendicular to line to avoid overlap
           const labelX = midX - offset * Math.sin(angle);
           const labelY = midY + offset * Math.cos(angle);
@@ -147,7 +147,8 @@ export default function TransportGraph({ allocation, costs, u, v }) {
             .attr("y1", y1)
             .attr("x2", x2)
             .attr("y2", y2)
-            .attr("stroke-width", Math.min(allocValue / 5, 8)) // Line width based on allocation
+            .attr("stroke-width", allocValue === "EPS" ? 2 : Math.min(allocValue / 5, 8))
+            .attr("stroke-dasharray", allocValue === "EPS" ? "4,4" : "0") // Line width based on allocation
             .attr("stroke", "#38bdf8")
             .attr("stroke-linecap", "round")
             .attr("opacity", 0.9);
@@ -165,7 +166,7 @@ export default function TransportGraph({ allocation, costs, u, v }) {
             .attr("stroke", "#0f172a")
             .attr("stroke-width", 0.5)
             .attr("paint-order", "stroke")
-            .text(displayValues[i][j]); // Display COST value from costs matrix
+            .text(allocValue === "EPS" ? "ε" : displayValues[i][j]);
         }
       }
     }

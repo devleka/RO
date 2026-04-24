@@ -54,7 +54,7 @@ export default function TransportTable({
 
               return (
                 <td key={j} className={style}>
-                  {c}
+                  {c === "EPS" ? "ε" : c}
                 </td>
               );
             })}

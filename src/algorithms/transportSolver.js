@@ -11,8 +11,8 @@ export function solveTransport(data) {
     [...data.demand],
     steps,
   );
-  
-const EPS = 0.1;
+
+  const EPS = "EPS";
 
   const m = data.costs.length;
   const n = data.costs[0].length;
@@ -21,7 +21,7 @@ const EPS = 0.1;
 
   if (nb < m + n - 1) {
     // dégénérescence
-    console.log("cas de genrer",nb," ",m," ",n)
+    console.log("cas de genrer", nb, " ", m, " ", n)
     nb = addEpsilon(allocation, steps, EPS, nb, m, n);
   }
 
@@ -32,8 +32,9 @@ const EPS = 0.1;
 
   for (let i = 0; i < data.costs.length; i++) {
     for (let j = 0; j < data.costs[0].length; j++) {
-      if (allocation[i][j] > 0) {
-        const product = data.costs[i][j] * allocation[i][j];
+      if (allocation[i][j] === "EPS" || allocation[i][j] > 0) {
+        const quantity = allocation[i][j] === "EPS" ? 0 : allocation[i][j];
+        const product = data.costs[i][j] * quantity;
         baseCost += product;
         formulaParts.push(`${allocation[i][j]}×${data.costs[i][j]}`);
       }
@@ -60,55 +61,55 @@ const EPS = 0.1;
   }
 
   function computeDegrees(allocation) {
-  const m = allocation.length;
-  const n = allocation[0].length;
+    const m = allocation.length;
+    const n = allocation[0].length;
 
-  const rowCount = Array(m).fill(0);
-  const colCount = Array(n).fill(0);
+    const rowCount = Array(m).fill(0);
+    const colCount = Array(n).fill(0);
 
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
-      if (allocation[i][j] > 0) {
-        rowCount[i]++;
-        colCount[j]++;
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        if (allocation[i][j] > 0) {
+          rowCount[i]++;
+          colCount[j]++;
+        }
       }
     }
+
+    return { rowCount, colCount };
   }
 
-  return { rowCount, colCount };
-}
+  function findMinIndices(arr) {
+    const min = Math.min(...arr);
+    return arr
+      .map((v, i) => (v === min ? i : -1))
+      .filter(i => i !== -1);
+  }
 
-function findMinIndices(arr) {
-  const min = Math.min(...arr);
-  return arr
-    .map((v, i) => (v === min ? i : -1))
-    .filter(i => i !== -1);
-}
+  function addEpsilon(allocation, steps, EPS, nb, m, n) {
+    const { rowCount, colCount } = computeDegrees(allocation);
 
-function addEpsilon(allocation, steps, EPS, nb, m, n) {
-  const { rowCount, colCount } = computeDegrees(allocation);
+    const minRows = findMinIndices(rowCount);
+    const minCols = findMinIndices(colCount);
 
-  const minRows = findMinIndices(rowCount);
-  const minCols = findMinIndices(colCount);
+    for (let i of minRows) {
+      for (let j of minCols) {
+        if (allocation[i][j] === 0) {
+          allocation[i][j] = EPS;
 
-  for (let i of minRows) {
-    for (let j of minCols) {
-      if (allocation[i][j] === 0) {
-        allocation[i][j] = EPS;
+          steps.push({
+            message: `Ajout ε en (${i},${j}) basé sur degré minimal`,
+            table: JSON.parse(JSON.stringify(allocation)),
+          });
 
-        steps.push({
-          message: `Ajout ε en (${i},${j}) basé sur degré minimal`,
-          table: JSON.parse(JSON.stringify(allocation)),
-        });
-
-        nb++;
-        return nb; // on ajoute un seul epsilon
+          nb++;
+          return nb; // on ajoute un seul epsilon
+        }
       }
     }
-  }
 
-  return nb;
-}
+    return nb;
+  }
 
   return {
     allocation,
