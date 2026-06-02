@@ -1,3 +1,5 @@
+import isBasic from "./isBasic.js";
+
 export function findCycle(start, alloc) {
   const m = alloc.length;
   const n = alloc[0].length;
@@ -13,7 +15,8 @@ export function findCycle(start, alloc) {
         if (j === col) continue;
 
         const isStart = row === start.row && j === start.col;
-        const canUse = isStart || alloc[row][j] > 0;
+  // consider EPS as usable (basic) cells
+  const canUse = isStart || isBasic(alloc[row][j]);
         if (!canUse) continue;
 
         const key = `${row}-${j}`;
@@ -30,7 +33,8 @@ export function findCycle(start, alloc) {
         if (i === row) continue;
 
         const isStart = i === start.row && col === start.col;
-        const canUse = isStart || alloc[i][col] > 0;
+  // consider EPS as usable (basic) cells
+  const canUse = isStart || isBasic(alloc[i][col]);
         if (!canUse) continue;
 
         const key = `${i}-${col}`;

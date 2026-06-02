@@ -36,7 +36,7 @@ export default function App() {
       setResult({ allocation, cost });
       setShowFinalResult(true); // Show immediately in direct mode
     }
-    
+
     setIsSolved(true);
   }
 
@@ -53,7 +53,13 @@ export default function App() {
     let z = 0;
     for (let i = 0; i < costs.length; i++) {
       for (let j = 0; j < costs[0].length; j++) {
-        z += costs[i][j] * (allocationTable?.[i]?.[j] || 0);
+        const val = allocationTable?.[i]?.[j];
+
+        if (val === "EPS") {
+          z += 0;
+        } else {
+          z += costs[i][j] * (val || 0);
+        }
       }
     }
     return z;
@@ -78,11 +84,10 @@ export default function App() {
         <div className="flex flex-col items-start gap-2">
           <div className="inline-flex items-center gap-2 rounded-full bg-slate-800/70 p-1 text-xs">
             <button
-              className={`px-3 py-1 rounded-full transition-colors ${
-                mode === "direct"
+              className={`px-3 py-1 rounded-full transition-colors ${mode === "direct"
                   ? "bg-sky-500 text-white"
                   : "text-slate-300 hover:bg-slate-700/70"
-              }`}
+                }`}
               onClick={() => {
                 setMode("direct");
                 handleNewCalculation();
@@ -91,11 +96,10 @@ export default function App() {
               Résultat direct
             </button>
             <button
-              className={`px-3 py-1 rounded-full transition-colors ${
-                mode === "pedagogique"
+              className={`px-3 py-1 rounded-full transition-colors ${mode === "pedagogique"
                   ? "bg-emerald-500 text-white"
                   : "text-slate-300 hover:bg-slate-700/70"
-              }`}
+                }`}
               onClick={() => {
                 setMode("pedagogique");
                 handleNewCalculation();
@@ -104,7 +108,7 @@ export default function App() {
               Mode pédagogique
             </button>
           </div>
-          
+
           {isSolved && (
             <button
               className="px-4 py-1.5 rounded-lg border border-slate-600 text-sm text-slate-100 hover:bg-slate-700/60 transition"
@@ -137,9 +141,9 @@ export default function App() {
 
         {result && ((mode === "direct") || (mode === "pedagogique" && showFinalResult)) && (
           <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 shadow-lg shadow-slate-950/50">
-            <ResultPanel 
-              solution={result.allocation} 
-              cost={result.cost} 
+            <ResultPanel
+              solution={result.allocation}
+              cost={result.cost}
               onReset={handleNewCalculation}
             />
           </div>

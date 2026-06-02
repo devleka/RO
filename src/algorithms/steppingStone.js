@@ -1,4 +1,5 @@
 import { findCycle } from "./cycleFinder.js";
+import isBasic from "./isBasic.js";
 
 export function steppingStone(costs, alloc, steps) {
   const m = costs.length;
@@ -11,7 +12,7 @@ export function steppingStone(costs, alloc, steps) {
     const basics = [];
     for (let i = 0; i < m; i++) {
       for (let j = 0; j < n; j++) {
-        if (alloc[i][j] > 0) basics.push({ i, j });
+        if (isBasic(alloc[i][j])) basics.push({ i, j });
       }
     }
 
@@ -81,17 +82,17 @@ export function steppingStone(costs, alloc, steps) {
     const delta = Array.from({ length: m }, () => Array(n).fill(""));
     let bestDelta = 0;
     let bestPos = null;
-    
+
     // Track delta calculations for display
     let deltaFormulas = [];
 
     for (let i = 0; i < m; i++) {
       for (let j = 0; j < n; j++) {
-        if (alloc[i][j] === 0) {
+        if (!isBasic(alloc[i][j])) {
           const d = costs[i][j] - u[i] - v[j];
           const deltaStr = Number(d.toFixed(2));
           delta[i][j] = deltaStr;
-          
+
           // Store formula for non-basic cells
           deltaFormulas.push({
             row: i,
@@ -99,7 +100,7 @@ export function steppingStone(costs, alloc, steps) {
             formula: `Δ${String.fromCharCode(65 + i)}${j + 1} = C${String.fromCharCode(65 + i)}${j + 1} - u${String.fromCharCode(65 + i)} - v${j + 1} = ${costs[i][j]} - ${u[i]} - ${v[j]} = ${deltaStr}`,
             value: deltaStr
           });
-          
+
           if (d < bestDelta) {
             bestDelta = d;
             bestPos = { row: i, col: j };
@@ -111,6 +112,26 @@ export function steppingStone(costs, alloc, steps) {
     }
 
     return { delta, bestDelta, bestPos, formulas: deltaFormulas };
+  }
+
+  function computeCurrentCost(currentAlloc) {
+    let z = 0;
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        const qty = currentAlloc[i][j] === "EPS" ? 0 : currentAlloc[i][j];
+        z += costs[i][j] * qty;
+      }
+    }
+    return z;
+  }
+
+  function hasEpsilon(currentAlloc) {
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        if (currentAlloc[i][j] === "EPS") return true;
+      }
+    }
+    return false;
   }
 
   let optimal = false;
@@ -131,7 +152,7 @@ export function steppingStone(costs, alloc, steps) {
     });
 
     const { delta, bestDelta, bestPos, formulas: deltaFormulas } = computeDeltas(u, v);
-    
+
     // Single step with all deltas for overview
     steps.push({
       message: "Calcul des coûts marginaux Δ(x,y)",
@@ -140,7 +161,7 @@ export function steppingStone(costs, alloc, steps) {
       v,
       deltaFormulas: deltaFormulas
     });
-    
+
     // Step with negative deltas only
     const negativeDeltas = deltaFormulas.filter(f => f.value < 0);
     if (negativeDeltas.length > 0) {
@@ -152,7 +173,7 @@ export function steppingStone(costs, alloc, steps) {
         negativeDeltas: negativeDeltas
       });
     }
-    
+
     // Step with delta table
     steps.push({
       message: "Synthèse des coûts marginaux",
@@ -215,17 +236,71 @@ export function steppingStone(costs, alloc, steps) {
 
     for (let k = 1; k < bestCycle.length; k += 2) minus.push(bestCycle[k]);
 
-    let theta = Math.min(...minus.map((c) => alloc[c.row][c.col]));
-
-    for (let k = 0; k < bestCycle.length; k++) {
-      let c = bestCycle[k];
-
-      if (k % 2 === 0) alloc[c.row][c.col] += theta;
-      else alloc[c.row][c.col] -= theta;
+    // Déterminer theta : si une des cases '-' est "EPS", on considère theta = 'EPS' (symbolique, plus petit que tout entier).
+    let thetaVal;
+    if (minus.some((c) => alloc[c.row][c.col] === "EPS")) {
+      thetaVal = "EPS";
+    } else {
+      thetaVal = Math.min(...minus.map((c) => alloc[c.row][c.col]));
     }
 
+    // Préparer et pousser une étape détaillée si EPS est présent dans l'allocation (afficher Z, gain, θ et cycle)
+    const containsEPS = hasEpsilon(alloc);
+    if (containsEPS) {
+      const currentZ = Number(computeCurrentCost(alloc).toFixed(2));
+      const estimatedGain = thetaVal === "EPS" ? 0 : Number((-bestDelta * thetaVal).toFixed(2));
+      const estimatedNewZ = thetaVal === "EPS" ? currentZ : Number((currentZ + bestDelta * thetaVal).toFixed(2));
+
+      const cycleRepresentation = bestCycle.map((c, idx) => {
+        const label = `${String.fromCharCode(65 + c.row)}${c.col + 1}`;
+        const sign = idx % 2 === 0 ? "+θ" : "-θ";
+        return { label, sign };
+      });
+
+      steps.push({
+        message: `Détail substitution → Z = ${currentZ.toFixed(2)} (gain: ${estimatedGain.toFixed(2)})`,
+        table: JSON.parse(JSON.stringify(alloc)),
+        theta: thetaVal === "EPS" ? "ε" : Number(thetaVal.toFixed(2)),
+        cycle: cycleRepresentation,
+        note: "Cases vertes (+θ): augmentation • Cases rouges (-θ): diminution",
+        currentZ,
+        estimatedGain,
+        estimatedNewZ,
+      });
+    }
+for (let k = 0; k < bestCycle.length; k++) {
+  let c = bestCycle[k];
+  const isPlus = k % 2 === 0;
+  const cell = alloc[c.row][c.col];
+
+  if (thetaVal === "EPS") {
+    // 🔥 CAS SPECIAL EPS
+    if (isPlus) {
+      if (cell === 0) {
+        alloc[c.row][c.col] = "EPS"; // entrée dans la base
+      }
+    } else {
+      if (cell === "EPS") {
+        alloc[c.row][c.col] = 0; // sortie de la base
+      }
+    }
+  } else {
+    // 🔵 CAS NORMAL (numérique)
+    if (isPlus) {
+      alloc[c.row][c.col] =
+        cell === "EPS" ? thetaVal : cell + thetaVal;
+    } else {
+      if (cell === "EPS") {
+        alloc[c.row][c.col] = 0;
+      } else {
+        alloc[c.row][c.col] -= thetaVal;
+      }
+    }
+  }
+}
+
     steps.push({
-      message: "Substitution / amélioration θ=" + theta,
+        message: "Substitution / amélioration θ=" + (thetaVal === "EPS" ? "ε" : thetaVal),
       highlight: bestPos ? [bestPos] : undefined,
       cycle: bestCycle,
       table: JSON.parse(JSON.stringify(alloc)),

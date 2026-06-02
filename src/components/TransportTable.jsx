@@ -51,10 +51,12 @@ export default function TransportTable({
 
               if (cycle?.some((x) => x.row === i && x.col === j))
                 style += " bg-emerald-500 text-white";
+              // If cell is EPS (first placement), highlight it in yellow like other highlights
+              if (c === "EPS") style += " bg-amber-300 text-slate-900";
 
               return (
                 <td key={j} className={style}>
-                  {c}
+                  {c === "EPS" ? "ε" : c}
                 </td>
               );
             })}
