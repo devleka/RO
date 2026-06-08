@@ -1,7 +1,6 @@
 import { minitab } from "./minitab.js";
 import { steppingStone } from "./steppingStone.js";
 import countAllocations from "./compteallocation.js";
-import { findCycle } from "./cycleFinder.js";
 
 export function solveTransport(data) {
   let steps = [];
@@ -13,11 +12,6 @@ export function solveTransport(data) {
     steps,
   );
 
-  // Token utilisé pour représenter une allocation epsilon (dégénérescence).
-  // Règles : EPS est considéré comme une valeur symbolique égale à 0 dans les calculs.
-  // - EPS * a = 0
-  // - EPS + a = a
-  // - a - EPS = a
   const EPS = "EPS";
 
   const m = data.costs.length;
@@ -31,6 +25,9 @@ export function solveTransport(data) {
     nb = addEpsilon(allocation, steps, EPS, nb, m, n);
   }
 
+
+  // Save the basic solution (after MINITAB + epsilon, before Stepping-Stone)
+  const basicSolution = JSON.parse(JSON.stringify(allocation));
 
   // Add Z calculation step after MINITAB completes
   let baseCost = 0;
@@ -62,9 +59,7 @@ export function solveTransport(data) {
 
   for (let i = 0; i < data.costs.length; i++) {
     for (let j = 0; j < data.costs[0].length; j++) {
-      // Traiter EPS comme zéro lors du calcul final du coût total.
-      const qty = allocation[i][j] === EPS ? 0 : allocation[i][j];
-      cost += data.costs[i][j] * qty;
+      cost += data.costs[i][j] * allocation[i][j];
     }
   }
 
@@ -93,38 +88,35 @@ export function solveTransport(data) {
       .map((v, i) => (v === min ? i : -1))
       .filter(i => i !== -1);
   }
-function addEpsilon(allocation, steps, EPS, m, n) {
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < n; j++) {
 
-      if (allocation[i][j] !== 0) continue;
+  function addEpsilon(allocation, steps, EPS, nb, m, n) {
+    const { rowCount, colCount } = computeDegrees(allocation);
 
-      // 🔍 TEST : est-ce que ça crée un cycle ?
-      const testAlloc = allocation.map(row => [...row]);
-      testAlloc[i][j] = EPS;
+    const minRows = findMinIndices(rowCount);
+    const minCols = findMinIndices(colCount);
 
-      const cycle = findCycle({ row: i, col: j }, testAlloc);
+    for (let i of minRows) {
+      for (let j of minCols) {
+        if (allocation[i][j] === 0) {
+          allocation[i][j] = EPS;
 
-      if (!cycle) {
-        // ✅ BON emplacement
-        allocation[i][j] = EPS;
+          steps.push({
+            message: `Ajout ε en (${i},${j}) basé sur degré minimal`,
+            table: JSON.parse(JSON.stringify(allocation)),
+          });
 
-        steps.push({
-          message: `Ajout ε en (${String.fromCharCode(65 + i)},${j + 1}) sans créer de cycle`,
-          table: JSON.parse(JSON.stringify(allocation)),
-        });
-
-        return true;
+          nb++;
+          return nb; // on ajoute un seul epsilon
+        }
       }
     }
-  }
 
-  console.warn("⚠️ Aucun emplacement valide pour ε trouvé !");
-  return false;
-}
+    return nb;
+  }
 
   return {
     allocation,
+    basicSolution,
     cost,
     steps,
   };
