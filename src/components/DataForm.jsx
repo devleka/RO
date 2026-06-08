@@ -29,7 +29,6 @@ function resizeVector(vec, len, fillValue = "") {
 export default function DataForm({ value, onChange, onSolve }) {
   const [m, setM] = useState(value.costs.length);
   const [n, setN] = useState(value.costs[0]?.length ?? 1);
-
   const [errors, setErrors] = useState([]);
 
   const ui = useMemo(() => {
@@ -44,7 +43,6 @@ export default function DataForm({ value, onChange, onSolve }) {
     const nn = clampInt(nextN, 1, 12);
     setM(nm);
     setN(nn);
-
     onChange({
       costs: resizeMatrix(value.costs, nm, nn, ""),
       supply: resizeVector(value.supply, nm, ""),
@@ -71,7 +69,6 @@ export default function DataForm({ value, onChange, onSolve }) {
 
   function validateAndSolve(e) {
     e?.preventDefault?.();
-
     const parsed = {
       costs: ui.costs.map((r) => r.map(toNumber)),
       supply: ui.supply.map(toNumber),
@@ -82,12 +79,11 @@ export default function DataForm({ value, onChange, onSolve }) {
     if (parsed.costs.length === 0 || parsed.costs[0].length === 0) {
       nextErrors.push("La matrice des coûts est vide.");
     }
-
     const sumSupply = parsed.supply.reduce((a, b) => a + b, 0);
     const sumDemand = parsed.demand.reduce((a, b) => a + b, 0);
     if (Math.abs(sumSupply - sumDemand) > 1e-9) {
       nextErrors.push(
-        `Problème non équilibré: somme(offres)=${sumSupply} ≠ somme(demandes)=${sumDemand}.`,
+        `Problème non équilibré: Σ(offres)=${sumSupply} ≠ Σ(demandes)=${sumDemand}.`,
       );
     }
 
@@ -98,146 +94,189 @@ export default function DataForm({ value, onChange, onSolve }) {
   return (
     <form
       onSubmit={validateAndSolve}
-      className="bg-slate-800/60 border border-slate-700 rounded-xl p-7 shadow-lg shadow-slate-950/50 space-y-4 w-full"
+      className="space-y-6"
     >
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-100">Données</h2>
-          <p className="text-xs text-slate-300">
-            Saisis coûts, offres, demandes. (Le problème doit être équilibré.)
-          </p>
+      {/* Card: Problem Definition */}
+      <div className="bg-slate-800/50 border border-slate-700/60 rounded-2xl shadow-xl shadow-black/20 overflow-hidden">
+        {/* Card Header */}
+        <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/40">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <svg className="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Données du problème
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Définissez les coûts de transport, les offres et les demandes
+              </p>
+            </div>
+
+            {/* Size Controls */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-700/50">
+                <label className="text-xs text-slate-400 whitespace-nowrap">Sources</label>
+                <input
+                  className="w-12 text-center rounded-md bg-slate-800 border border-slate-600 px-1 py-1 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
+                  value={m}
+                  onChange={(e) => updateSize(e.target.value, n)}
+                  type="number"
+                  min="1"
+                  max="12"
+                />
+              </div>
+              <span className="text-slate-600 text-xs">×</span>
+              <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-700/50">
+                <label className="text-xs text-slate-400 whitespace-nowrap">Destinations</label>
+                <input
+                  className="w-12 text-center rounded-md bg-slate-800 border border-slate-600 px-1 py-1 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
+                  value={n}
+                  onChange={(e) => updateSize(m, e.target.value)}
+                  type="number"
+                  min="1"
+                  max="12"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-end gap-2">
-          <label className="text-xs text-slate-300">
-            Sources (m)
-            <input
-              className="mt-1 w-20 block rounded-lg bg-slate-900/60 border border-slate-700 px-2 py-1 text-slate-100 appearance-none hover:border-sky-500/60 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
-              value={m}
-              onChange={(e) => updateSize(e.target.value, n)}
-              type="number"
-            />
-          </label>
-          <label className="text-xs text-slate-300">
-            Destinations (n)
-            <input
-              className="mt-1 w-24 block rounded-lg bg-slate-900/60 border border-slate-700 px-2 py-1 text-slate-100 appearance-none hover:border-sky-500/60 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
-              value={n}
-              onChange={(e) => updateSize(m, e.target.value)}
-              type="number"
-            />
-          </label>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium text-slate-200">
-          Matrice des coûts (offres à droite, demandes en bas)
-        </h3>
-        <div className="overflow-auto">
-          <table className="border border-collapse border-slate-600 bg-slate-900/60 rounded-lg overflow-hidden">
-            <tbody>
-              <tr>
-                <td className="border-0 p-1 bg-slate-950/40 text-slate-300 text-xs font-semibold text-center w-10">
-                  {/* coin */}
-                </td>
-                {ui.costs[0]?.map((_, j) => (
-                  <td
-                    key={j}
-                    className="border-0 p-1 py-2.5 bg-slate-950/40 text-slate-200 text-xs font-semibold text-center"
-                  >
-                    {j + 1}
+        {/* Cost Matrix */}
+        <div className="px-6 py-5">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+            Matrice des coûts C<sub>ij</sub>
+          </h3>
+          <div className="overflow-x-auto rounded-xl border border-slate-700/50">
+            <table className="w-full border-collapse">
+              <tbody>
+                {/* Column headers */}
+                <tr>
+                  <td className="w-12 bg-slate-900/70 border border-slate-700/40" />
+                  {ui.costs[0]?.map((_, j) => (
+                    <td
+                      key={j}
+                      className="bg-slate-900/70 border border-slate-700/40 px-1 py-2.5 text-center text-xs font-bold text-slate-300"
+                    >
+                      D{j + 1}
+                    </td>
+                  ))}
+                  <td className="bg-slate-900/70 border border-slate-700/40 px-1 py-2.5 text-center text-xs font-bold text-amber-400/80">
+                    Offre
                   </td>
-                ))}
-                <td className="border-0 p-1 bg-slate-950/40 text-rose-200 text-xs font-semibold text-center"></td>
-              </tr>
+                </tr>
 
-              {ui.costs.map((row, i) => (
-                <tr key={i}>
-                  <td className="border-0 p-1 bg-slate-950/40 text-slate-200 text-xs font-semibold text-center w-10">
-                    {String.fromCharCode(65 + i)}
-                  </td>
-                  {row.map((cell, j) => (
-                    <td key={j} className="border-0 p-1">
+                {/* Data rows */}
+                {ui.costs.map((row, i) => (
+                  <tr key={i} className={i % 2 === 0 ? "bg-slate-800/30" : "bg-slate-800/10"}>
+                    <td className="bg-slate-900/70 border border-slate-700/40 px-1 py-2 text-center text-xs font-bold text-slate-300">
+                      {String.fromCharCode(65 + i)}
+                    </td>
+                    {row.map((cell, j) => (
+                      <td key={j} className="border border-slate-700/40 p-1">
+                        <input
+                          className="w-full h-10 text-center rounded-md bg-slate-900/50 border border-slate-700/50 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 hover:border-slate-600 transition"
+                          value={cell}
+                          onChange={(e) => updateCost(i, j, e.target.value)}
+                          inputMode="decimal"
+                        />
+                      </td>
+                    ))}
+                    <td className="border border-slate-700/40 p-1 bg-amber-950/10">
                       <input
-                        className="w-16 h-10 text-center rounded-md bg-slate-950/60 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
-                        value={cell}
-                        onChange={(e) => updateCost(i, j, e.target.value)}
+                        className="w-full h-10 text-center rounded-md bg-slate-900/50 border border-amber-700/40 text-amber-200 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 hover:border-amber-600/50 transition"
+                        value={ui.supply[i] ?? ""}
+                        onChange={(e) => updateSupply(i, e.target.value)}
                         inputMode="decimal"
+                        title="Offre (supply)"
+                      />
+                    </td>
+                  </tr>
+                ))}
+
+                {/* Demand row */}
+                <tr className="bg-emerald-950/10">
+                  <td className="bg-slate-900/70 border border-slate-700/40 px-1 py-2 text-center text-xs font-bold text-emerald-400/80">
+                    Dem.
+                  </td>
+                  {ui.demand.map((v, j) => (
+                    <td key={j} className="border border-slate-700/40 p-1">
+                      <input
+                        className="w-full h-10 text-center rounded-md bg-slate-900/50 border border-emerald-700/40 text-emerald-200 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 hover:border-emerald-600/50 transition"
+                        value={v ?? ""}
+                        onChange={(e) => updateDemand(j, e.target.value)}
+                        inputMode="decimal"
+                        title="Demande (demand)"
                       />
                     </td>
                   ))}
-
-                  <td className="border-0 p-1 bg-slate-950/30">
-                    <input
-                      className="w-16 h-10 text-center rounded-md bg-slate-950/60 border border-slate-700 text-rose-200 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition"
-                      value={ui.supply[i] ?? ""}
-                      onChange={(e) => updateSupply(i, e.target.value)}
-                      inputMode="decimal"
-                      title="Offre (supply)"
-                    />
+                  <td className="border border-slate-700/40 bg-slate-900/70 px-1 text-center text-xs text-slate-500 font-medium">
+                    Σ
                   </td>
                 </tr>
-              ))}
+              </tbody>
+            </table>
+          </div>
 
-              <tr>
-                <td className="border-0 p-1 bg-slate-950/40 text-rose-200 text-xs font-semibold text-center w-10"></td>
-                {ui.demand.map((v, j) => (
-                  <td key={j} className="border-0 p-1 bg-slate-950/30">
-                    <input
-                      className="w-16 h-10 text-center rounded-md bg-slate-950/60 border border-slate-700 text-rose-200 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition"
-                      value={v ?? ""}
-                      onChange={(e) => updateDemand(j, e.target.value)}
-                      inputMode="decimal"
-                      title="Demande (demand)"
-                    />
-                  </td>
+          <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-400/60" />
+              Offre (supply) par source
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400/60" />
+              Demande (demand) par destination
+            </span>
+          </div>
+        </div>
+
+        {/* Errors */}
+        {errors.length > 0 && (
+          <div className="mx-6 mb-4 rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
+            <div className="flex items-start gap-2">
+              <svg className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <ul className="space-y-1">
+                {errors.map((err, idx) => (
+                  <li key={idx} className="text-sm text-rose-200">{err}</li>
                 ))}
-                <td className="border-0 p-1 bg-slate-950/40 text-slate-400 text-xs text-center">
-                  Σ
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="px-6 py-4 border-t border-slate-700/50 bg-slate-800/30 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            className="px-4 py-2.5 rounded-xl border border-slate-600/60 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white hover:border-slate-500 transition-all duration-200"
+            onClick={() =>
+              onChange({
+                costs: [
+                  [24, 22, 61, 49, 83, 35],
+                  [23, 39, 78, 28, 65, 42],
+                  [67, 56, 92, 24, 53, 54],
+                  [71, 43, 91, 67, 40, 49],
+                ].map((r) => r.map(String)),
+                supply: [18, 32, 14, 9].map(String),
+                demand: [9, 11, 28, 6, 14, 5].map(String),
+              })
+            }
+          >
+            Charger exemple
+          </button>
+
+          <button
+            type="submit"
+            className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all duration-200 flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Résoudre
+          </button>
         </div>
-      </div>
-
-      {errors.length > 0 && (
-        <div className="rounded-lg border border-rose-500/40 bg-rose-950/30 p-3 text-sm text-rose-100">
-          <ul className="list-disc pl-5 space-y-1">
-            {errors.map((err, idx) => (
-              <li key={idx}>{err}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm shadow-md shadow-blue-900/40 transition"
-        >
-          Lancer le calcul
-        </button>
-
-        <button
-          type="button"
-          className="px-4 py-2 rounded-lg border border-slate-600 text-sm text-slate-100 hover:bg-slate-700/60 transition"
-          onClick={() =>
-            onChange({
-              costs: [
-                [24, 22, 61, 49, 83, 35],
-                [23, 39, 78, 28, 65, 42],
-                [67, 56, 92, 24, 53, 54],
-                [71, 43, 91, 67, 40, 49],
-              ].map((r) => r.map(String)),
-              supply: [18, 32, 14, 9].map(String),
-              demand: [9, 11, 28, 6, 14, 5].map(String),
-            })
-          }
-        >
-          Exemple
-        </button>
       </div>
     </form>
   );

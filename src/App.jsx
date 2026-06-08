@@ -25,16 +25,16 @@ export default function App() {
   });
 
   function solve(data) {
-    const { allocation, cost, steps } = solveTransport(data);
+    const { allocation, basicSolution, cost, steps } = solveTransport(data);
 
     if (mode === "pedagogique") {
       setSteps(steps);
-      setResult({ allocation, cost });
-      setShowFinalResult(false); // Don't show result yet in pedagogical mode
+      setResult({ allocation, basicSolution, cost });
+      setShowFinalResult(false);
     } else {
       setSteps([]);
-      setResult({ allocation, cost });
-      setShowFinalResult(true); // Show immediately in direct mode
+      setResult({ allocation, basicSolution, cost });
+      setShowFinalResult(true);
     }
 
     setIsSolved(true);
@@ -71,64 +71,78 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-10">
-      <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Transport Solver</h1>
-          <p className="text-sm text-slate-300">
-            Méthode MINITAB pour la solution initiale, puis Stepping-Stone pour
-            l&apos;amélioration.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+      {/* Top accent bar */}
+      <div className="h-1 bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-500" />
 
-        <div className="flex flex-col items-start gap-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-800/70 p-1 text-xs">
-            <button
-              className={`px-3 py-1 rounded-full transition-colors ${mode === "direct"
-                  ? "bg-sky-500 text-white"
-                  : "text-slate-300 hover:bg-slate-700/70"
-                }`}
-              onClick={() => {
-                setMode("direct");
-                handleNewCalculation();
-              }}
-            >
-              Résultat direct
-            </button>
-            <button
-              className={`px-3 py-1 rounded-full transition-colors ${mode === "pedagogique"
-                  ? "bg-emerald-500 text-white"
-                  : "text-slate-300 hover:bg-slate-700/70"
-                }`}
-              onClick={() => {
-                setMode("pedagogique");
-                handleNewCalculation();
-              }}
-            >
-              Mode pédagogique
-            </button>
+      <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Header */}
+        <header className="mb-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-300 to-blue-400 bg-clip-text text-transparent">
+                Transport Solver
+              </h1>
+              <p className="text-sm text-slate-400 mt-1">
+                MINITAB → Solution initiale · Stepping-Stone → Optimisation
+              </p>
+            </div>
+
+            {/* Mode Toggle */}
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center rounded-xl bg-slate-800/80 border border-slate-700/60 p-1 text-xs shadow-lg shadow-black/20">
+                <button
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    mode === "direct"
+                      ? "bg-sky-500 text-white shadow-md shadow-sky-500/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+                  }`}
+                  onClick={() => {
+                    setMode("direct");
+                    handleNewCalculation();
+                  }}
+                >
+                  Direct
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    mode === "pedagogique"
+                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+                  }`}
+                  onClick={() => {
+                    setMode("pedagogique");
+                    handleNewCalculation();
+                  }}
+                >
+                  Pédagogique
+                </button>
+              </div>
+
+              {isSolved && (
+                <button
+                  className="px-3 py-2 rounded-lg border border-slate-700/60 text-xs text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-600 transition-all duration-200"
+                  onClick={handleNewCalculation}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Nouveau
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
+        </header>
 
-          {isSolved && (
-            <button
-              className="px-4 py-1.5 rounded-lg border border-slate-600 text-sm text-slate-100 hover:bg-slate-700/60 transition"
-              onClick={handleNewCalculation}
-            >
-              ← Nouveau calcul
-            </button>
-          )}
-        </div>
-      </header>
-
-      <div className="grid gap-8 md:grid-cols-1 items-start">
-        {!isSolved && (
-          <div className="space-y-6">
+        {/* Main Content */}
+        <main>
+          {!isSolved && (
             <DataForm value={dataUi} onChange={setDataUi} onSolve={solve} />
-          </div>
-        )}
+          )}
 
-        {isSolved && mode === "pedagogique" && steps.length > 0 && !showFinalResult && (
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 shadow-lg shadow-slate-950/50">
+          {isSolved && mode === "pedagogique" && steps.length > 0 && !showFinalResult && (
             <StepPlayer
               steps={steps}
               costs={dataUi.costs.map((r) => r.map((x) => Number(x)))}
@@ -136,18 +150,17 @@ export default function App() {
               calculateCurrentZ={calculateCurrentZ}
               isSteppingStoneStep={isSteppingStoneStep}
             />
-          </div>
-        )}
+          )}
 
-        {result && ((mode === "direct") || (mode === "pedagogique" && showFinalResult)) && (
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 shadow-lg shadow-slate-950/50">
+          {result && ((mode === "direct") || (mode === "pedagogique" && showFinalResult)) && (
             <ResultPanel
-              solution={result.allocation}
+              basicSolution={result.basicSolution}
+              optimalSolution={result.allocation}
               cost={result.cost}
               onReset={handleNewCalculation}
             />
-          </div>
-        )}
+          )}
+        </main>
       </div>
     </div>
   );
