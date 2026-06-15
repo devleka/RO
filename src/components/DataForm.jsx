@@ -26,7 +26,7 @@ function resizeVector(vec, len, fillValue = "") {
   return Array.from({ length: len }, (_, i) => vec?.[i] ?? fillValue);
 }
 
-export default function DataForm({ value, onChange, onSolve }) {
+export default function DataForm({ value, onChange, onSolve, editMode, onClose }) {
   const [m, setM] = useState(value.costs.length);
   const [n, setN] = useState(value.costs[0]?.length ?? 1);
   const [errors, setErrors] = useState([]);
@@ -102,43 +102,53 @@ export default function DataForm({ value, onChange, onSolve }) {
         <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/40">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                <svg className="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                Données du problème
+              <h2 className={`${editMode ? 'text-base' : 'text-lg'} font-semibold text-slate-100 flex items-center gap-2`}>
+                {editMode ? (
+                  <svg className="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                )}
+                {editMode ? 'Modification des données' : 'Données du problème'}
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                Définissez les coûts de transport, les offres et les demandes
+                {editMode
+                  ? 'Modifiez les valeurs puis cliquez sur Recalculer — la position actuelle de l\'étape sera conservée'
+                  : 'Définissez les coûts de transport, les offres et les demandes'}
               </p>
             </div>
 
-            {/* Size Controls */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-700/50">
-                <label className="text-xs text-slate-400 whitespace-nowrap">Sources</label>
-                <input
-                  className="w-12 text-center rounded-md bg-slate-800 border border-slate-600 px-1 py-1 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
-                  value={m}
-                  onChange={(e) => updateSize(e.target.value, n)}
-                  type="number"
-                  min="1"
-                  max="12"
-                />
+            {/* Size Controls — hidden in edit mode */}
+            {!editMode && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-700/50">
+                  <label className="text-xs text-slate-400 whitespace-nowrap">Sources</label>
+                  <input
+                    className="w-12 text-center rounded-md bg-slate-800 border border-slate-600 px-1 py-1 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
+                    value={m}
+                    onChange={(e) => updateSize(e.target.value, n)}
+                    type="number"
+                    min="1"
+                    max="12"
+                  />
+                </div>
+                <span className="text-slate-600 text-xs">×</span>
+                <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-700/50">
+                  <label className="text-xs text-slate-400 whitespace-nowrap">Destinations</label>
+                  <input
+                    className="w-12 text-center rounded-md bg-slate-800 border border-slate-600 px-1 py-1 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
+                    value={n}
+                    onChange={(e) => updateSize(m, e.target.value)}
+                    type="number"
+                    min="1"
+                    max="12"
+                  />
+                </div>
               </div>
-              <span className="text-slate-600 text-xs">×</span>
-              <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 border border-slate-700/50">
-                <label className="text-xs text-slate-400 whitespace-nowrap">Destinations</label>
-                <input
-                  className="w-12 text-center rounded-md bg-slate-800 border border-slate-600 px-1 py-1 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/60 transition"
-                  value={n}
-                  onChange={(e) => updateSize(m, e.target.value)}
-                  type="number"
-                  min="1"
-                  max="12"
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -248,34 +258,58 @@ export default function DataForm({ value, onChange, onSolve }) {
 
         {/* Actions */}
         <div className="px-6 py-4 border-t border-slate-700/50 bg-slate-800/30 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            className="px-4 py-2.5 rounded-xl border border-slate-600/60 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white hover:border-slate-500 transition-all duration-200"
-            onClick={() =>
-              onChange({
-                costs: [
-                  [24, 22, 61, 49, 83, 35],
-                  [23, 39, 78, 28, 65, 42],
-                  [67, 56, 92, 24, 53, 54],
-                  [71, 43, 91, 67, 40, 49],
-                ].map((r) => r.map(String)),
-                supply: [18, 32, 14, 9].map(String),
-                demand: [9, 11, 28, 6, 14, 5].map(String),
-              })
-            }
-          >
-            Charger exemple
-          </button>
+          {editMode ? (
+            <>
+              <button
+                type="button"
+                className="px-4 py-2.5 rounded-xl border border-slate-600/60 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white hover:border-slate-500 transition-all duration-200"
+                onClick={onClose}
+              >
+                Annuler
+              </button>
 
-          <button
-            type="submit"
-            className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all duration-200 flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Résoudre
-          </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all duration-200 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Recalculer
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="px-4 py-2.5 rounded-xl border border-slate-600/60 text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white hover:border-slate-500 transition-all duration-200"
+                onClick={() =>
+                  onChange({
+                    costs: [
+                      [24, 22, 61, 49, 83, 35],
+                      [23, 39, 78, 28, 65, 42],
+                      [67, 56, 92, 24, 53, 54],
+                      [71, 43, 91, 67, 40, 49],
+                    ].map((r) => r.map(String)),
+                    supply: [18, 32, 14, 9].map(String),
+                    demand: [9, 11, 28, 6, 14, 5].map(String),
+                  })
+                }
+              >
+                Charger exemple
+              </button>
+
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all duration-200 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Résoudre
+              </button>
+            </>
+          )}
         </div>
       </div>
     </form>

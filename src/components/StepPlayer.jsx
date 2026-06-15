@@ -61,6 +61,13 @@ export default function StepPlayer({ steps, costs, onComplete, calculateCurrentZ
   const atEnd = i === steps.length - 1;
   const progress = steps.length > 1 ? (i / (steps.length - 1)) * 100 : 100;
 
+  // Clamp step index when steps array changes (e.g. after re-solving from inline edit)
+  useEffect(() => {
+    if (i >= steps.length && steps.length > 0) {
+      setI(steps.length - 1);
+    }
+  }, [steps.length, i]);
+
   useEffect(() => {
     if (atEnd && onComplete) {
       onComplete();

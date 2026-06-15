@@ -13,7 +13,8 @@ export function findCycle(start, alloc) {
         if (j === col) continue;
 
         const isStart = row === start.row && j === start.col;
-        const canUse = isStart || alloc[row][j] > 0;
+        const cellVal = alloc[row][j];
+        const canUse = isStart || cellVal > 0 || cellVal === "EPS";
         if (!canUse) continue;
 
         const key = `${row}-${j}`;
@@ -30,7 +31,8 @@ export function findCycle(start, alloc) {
         if (i === row) continue;
 
         const isStart = i === start.row && col === start.col;
-        const canUse = isStart || alloc[i][col] > 0;
+        const cellVal = alloc[i][col];
+        const canUse = isStart || cellVal > 0 || cellVal === "EPS";
         if (!canUse) continue;
 
         const key = `${i}-${col}`;

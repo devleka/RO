@@ -204,10 +204,10 @@ export function steppingStone(costs, alloc, steps) {
     // Compute theta before generating marking steps
     let minus = [];
     for (let k = 1; k < bestCycle.length; k += 2) minus.push(bestCycle[k]);
-    let theta = Math.min(
-      ...minus.map((c) =>
-        alloc[c.row][c.col] === "EPS" ? Infinity : alloc[c.row][c.col]
-      )
+    // If any minus cell holds "EPS", θ=0 (degenerate pivot: ε≈0 leaves the basis)
+    const hasEpsAtMinus = minus.some(c => alloc[c.row][c.col] === "EPS");
+    let theta = hasEpsAtMinus ? 0 : Math.min(
+      ...minus.map((c) => alloc[c.row][c.col])
     );
 
     // Sequential marking steps: reveal one cycle cell at a time
@@ -230,15 +230,29 @@ export function steppingStone(costs, alloc, steps) {
     }
 
     // Apply substitution
-    for (let k = 0; k < bestCycle.length; k++) {
-      let c = bestCycle[k];
-      if (alloc[c.row][c.col] === "EPS") {
-        alloc[c.row][c.col] = 0;
+    if (theta === 0) {
+      // Degenerate pivot: "EPS" at a minus position means θ=ε≈0.
+      // Convert all "EPS" in the cycle to 0 (they leave the basis),
+      // then set the entering cell (index 0) to "EPS" to maintain m+n-1 basic cells.
+      for (let k = 0; k < bestCycle.length; k++) {
+        const c = bestCycle[k];
+        if (alloc[c.row][c.col] === "EPS") {
+          alloc[c.row][c.col] = 0;
+        }
       }
-      if (k % 2 === 0) {
-        alloc[c.row][c.col] += theta;
-      } else {
-        alloc[c.row][c.col] -= theta;
+      alloc[bestCycle[0].row][bestCycle[0].col] = "EPS";
+    } else {
+      // Normal substitution: θ > 0
+      for (let k = 0; k < bestCycle.length; k++) {
+        const c = bestCycle[k];
+        if (alloc[c.row][c.col] === "EPS") {
+          alloc[c.row][c.col] = 0;
+        }
+        if (k % 2 === 0) {
+          alloc[c.row][c.col] += theta;
+        } else {
+          alloc[c.row][c.col] -= theta;
+        }
       }
     }
 

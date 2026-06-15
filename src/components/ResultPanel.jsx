@@ -1,6 +1,6 @@
 import TransportTable from "./TransportTable";
 
-export default function ResultPanel({ basicSolution, optimalSolution, cost, onReset }) {
+export default function ResultPanel({ basicSolution, optimalSolution, cost }) {
   const makeLabels = (matrix) => ({
     rowLabels: Array.from({ length: matrix.length }, (_, k) =>
       String.fromCharCode(65 + k),
@@ -29,19 +29,6 @@ export default function ResultPanel({ basicSolution, optimalSolution, cost, onRe
             </svg>
             Résultats
           </h2>
-          {onReset && (
-            <button
-              className="px-3 py-2 rounded-lg border border-slate-700/60 text-xs text-slate-300 hover:bg-slate-700/50 hover:text-white hover:border-slate-600 transition-all duration-200"
-              onClick={onReset}
-            >
-              <span className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Nouveau calcul
-              </span>
-            </button>
-          )}
         </div>
 
         <div className="p-6 space-y-6">

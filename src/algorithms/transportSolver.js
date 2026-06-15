@@ -59,7 +59,8 @@ export function solveTransport(data) {
 
   for (let i = 0; i < data.costs.length; i++) {
     for (let j = 0; j < data.costs[0].length; j++) {
-      cost += data.costs[i][j] * allocation[i][j];
+      const val = allocation[i][j] === "EPS" ? 0 : (allocation[i][j] || 0);
+      cost += data.costs[i][j] * val;
     }
   }
 
