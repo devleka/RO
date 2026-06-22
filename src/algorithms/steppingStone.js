@@ -1,5 +1,6 @@
 import { findCycle } from "./cycleFinder.js";
 import isBasic from "./isBasic.js";
+import countAllocations from "./compteallocation.js";
 
 export function steppingStone(costs, alloc, steps) {
   const m = costs.length;
@@ -307,6 +308,43 @@ for (let k = 0; k < bestCycle.length; k++) {
       u,
       v,
     });
+    // Après chaque substitution, vérifier si on est en situation dégénérée
+    // i.e. nombre de basiques < m + n - 1 ; si oui, tenter d'ajouter un EPS
+    function addEpsilonIfNeeded() {
+      const EPS = "EPS";
+      const needed = m + n - 1;
+      const nb = countAllocations(alloc);
+      if (nb >= needed) return false;
+
+      for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+          if (alloc[i][j] !== 0) continue;
+
+          // tester si l'ajout crée un cycle (on peut utiliser findCycle qui accepte EPS en base)
+          const testAlloc = alloc.map(row => [...row]);
+          testAlloc[i][j] = EPS;
+
+          const cycle = findCycle({ row: i, col: j }, testAlloc);
+          if (!cycle) {
+            alloc[i][j] = EPS;
+            steps.push({
+              message: `Ajout ε en (${String.fromCharCode(65 + i)},${j + 1}) après substitution (pour éviter dégénérescence)`,
+              table: JSON.parse(JSON.stringify(alloc)),
+            });
+            return true;
+          }
+        }
+      }
+
+      // aucun emplacement valide trouvé
+      steps.push({
+        message: "Aucun emplacement valide pour ε trouvé après substitution (dégénérescence non résolue)",
+        table: JSON.parse(JSON.stringify(alloc)),
+      });
+      return false;
+    }
+
+    addEpsilonIfNeeded();
   }
 
   return alloc;
