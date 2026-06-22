@@ -116,7 +116,7 @@ export default function DataForm({ value, onChange, onSolve, editMode, onClose }
               </h2>
               <p className="text-xs text-slate-400 mt-1">
                 {editMode
-                  ? 'Modifiez les valeurs puis cliquez sur Recalculer — la position actuelle de l\'étape sera conservée'
+                  ? 'Modifiez les valeurs puis cliquez sur Recalculer'
                   : 'Définissez les coûts de transport, les offres et les demandes'}
               </p>
             </div>
@@ -155,7 +155,7 @@ export default function DataForm({ value, onChange, onSolve, editMode, onClose }
         {/* Cost Matrix */}
         <div className="px-6 py-5">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
-            Matrice des coûts C<sub>ij</sub>
+            Matrice des coûts
           </h3>
           <div className="overflow-x-auto rounded-xl border border-slate-700/50">
             <table className="w-full border-collapse">
@@ -168,7 +168,7 @@ export default function DataForm({ value, onChange, onSolve, editMode, onClose }
                       key={j}
                       className="bg-slate-900/70 border border-slate-700/40 px-1 py-2.5 text-center text-xs font-bold text-slate-300"
                     >
-                      D{j + 1}
+                      {j + 1}
                     </td>
                   ))}
                   <td className="bg-slate-900/70 border border-slate-700/40 px-1 py-2.5 text-center text-xs font-bold text-amber-400/80">
@@ -227,7 +227,7 @@ export default function DataForm({ value, onChange, onSolve, editMode, onClose }
               </tbody>
             </table>
           </div>
-
+{/* 
           <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-amber-400/60" />
@@ -237,7 +237,7 @@ export default function DataForm({ value, onChange, onSolve, editMode, onClose }
               <span className="w-2 h-2 rounded-full bg-emerald-400/60" />
               Demande (demand) par destination
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* Errors */}

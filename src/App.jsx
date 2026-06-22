@@ -95,10 +95,10 @@ export default function App() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-300 to-blue-400 bg-clip-text text-transparent">
-                Transport Solver
+                Problème de transport
               </h1>
               <p className="text-sm text-slate-400 mt-1">
-                MINITAB → Solution initiale · Stepping-Stone → Optimisation
+                MINITAB: Solution initiale · Stepping-Stone: Optimisation
               </p>
             </div>
 
@@ -129,7 +129,7 @@ export default function App() {
                     handleNewCalculation();
                   }}
                 >
-                  Pédagogique
+                  Par étapes
                 </button>
               </div>
 
