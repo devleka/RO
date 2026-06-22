@@ -15,13 +15,13 @@ export default function App() {
 
   const [dataUi, setDataUi] = useState({
     costs: [
-      [24, 22, 61, 49, 83, 35],
-      [23, 39, 78, 28, 65, 42],
-      [67, 56, 92, 24, 53, 54],
-      [71, 43, 91, 67, 40, 49],
+      [19, 12, 14, 6, 9, 10],
+      [7, 3, 4, 7, 6, 5],
+      [6, 5, 9, 11, 3, 11],
+      [8, 7, 11, 2, 6, 12],
     ].map((r) => r.map(String)),
-    supply: [18, 32, 14, 9].map(String),
-    demand: [9, 11, 28, 6, 14, 5].map(String),
+    supply: [50, 60, 20, 90].map(String),
+    demand: [40, 30, 70, 20, 40, 20].map(String),
   });
 
   function solve(data) {
