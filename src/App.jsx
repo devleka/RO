@@ -44,7 +44,7 @@ export default function App() {
       steps: newSteps,
     } = solveTransport(data);
 
-    // In editing mode: re-solve silently, keep editor open and step position preserved
+    // Résoudre en silence pour le mode edition
     if (isEditing) {
       setSteps(newSteps);
       setResult({ allocation, basicSolution, cost });
@@ -77,7 +77,7 @@ export default function App() {
     setIsEditing((prev) => !prev);
   }
 
-  // Calculate current Z value for a given step
+  // Calcul de Z pour l'étape actuelle
   function calculateCurrentZ(allocationTable) {
     const costs = dataUi.costs.map((r) => r.map((x) => Number(x)));
     let z = 0;
@@ -95,7 +95,7 @@ export default function App() {
     return z;
   }
 
-  // Check if we're in Stepping-Stone phase (has potentials/deltas)
+  // Vérifier si nous sommes en phase Stepping-Stone (potentials/deltas)
   function isSteppingStoneStep(stepIndex) {
     return steps.some(
       (step, idx) => idx <= stepIndex && (step.u || step.v || step.deltaTable),
