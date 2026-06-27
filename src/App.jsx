@@ -16,17 +16,33 @@ export default function App() {
 
   const [dataUi, setDataUi] = useState({
     costs: [
-      [24, 22, 61, 49, 83, 35],
-      [23, 39, 78, 28, 65, 42],
-      [67, 56, 92, 24, 53, 54],
-      [71, 43, 91, 67, 40, 49],
+      [19, 12, 14, 6, 9, 10],
+      [7, 3, 4, 7, 6, 5],
+      [6, 5, 9, 11, 3, 11],
+      [8, 7, 11, 2, 6, 12],
     ].map((r) => r.map(String)),
-    supply: [18, 32, 14, 9].map(String),
-    demand: [9, 11, 28, 6, 14, 5].map(String),
+    supply: [50, 130, 20, 90].map(String),
+    demand: [40, 30, 70, 90, 40, 20].map(String),
   });
 
+  // const [dataUi, setDataUi] = useState({
+  //   costs: [
+  //     [24, 22, 61, 49, 83, 35],
+  //     [23, 39, 78, 28, 65, 42],
+  //     [67, 56, 92, 24, 53, 54],
+  //     [71, 43, 91, 67, 40, 49],
+  //   ].map((r) => r.map(String)),
+  //   supply: [18, 32, 14, 9].map(String),
+  //   demand: [9, 11, 28, 6, 14, 5].map(String),
+  // });
+
   function solve(data) {
-    const { allocation, basicSolution, cost, steps: newSteps } = solveTransport(data);
+    const {
+      allocation,
+      basicSolution,
+      cost,
+      steps: newSteps,
+    } = solveTransport(data);
 
     // In editing mode: re-solve silently, keep editor open and step position preserved
     if (isEditing) {
@@ -58,7 +74,7 @@ export default function App() {
 
   // Toggle the side editor for inline data modification
   function handleEditData() {
-    setIsEditing(prev => !prev);
+    setIsEditing((prev) => !prev);
   }
 
   // Calculate current Z value for a given step
@@ -81,7 +97,9 @@ export default function App() {
 
   // Check if we're in Stepping-Stone phase (has potentials/deltas)
   function isSteppingStoneStep(stepIndex) {
-    return steps.some((step, idx) => idx <= stepIndex && (step.u || step.v || step.deltaTable));
+    return steps.some(
+      (step, idx) => idx <= stepIndex && (step.u || step.v || step.deltaTable),
+    );
   }
 
   return (
@@ -89,16 +107,18 @@ export default function App() {
       {/* Top accent bar */}
       <div className="h-1 bg-gradient-to-r from-sky-500 via-blue-500 to-emerald-500" />
 
-      <div className={`${isEditing ? 'max-w-7xl' : 'max-w-5xl'} mx-auto px-4 py-6 sm:px-6 lg:px-8 transition-all duration-300`}>
+      <div
+        className={`${isEditing ? "max-w-7xl" : "max-w-5xl"} mx-auto px-4 py-6 sm:px-6 lg:px-8 transition-all duration-300`}
+      >
         {/* Header */}
         <header className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-300 to-blue-400 bg-clip-text text-transparent">
-                Transport Solver
+                Problème de transport
               </h1>
               <p className="text-sm text-slate-400 mt-1">
-                MINITAB → Solution initiale · Stepping-Stone → Optimisation
+                MINITAB: Solution initiale · Stepping-Stone: Optimisation
               </p>
             </div>
 
@@ -129,7 +149,7 @@ export default function App() {
                     handleNewCalculation();
                   }}
                 >
-                  Pédagogique
+                  Par étapes
                 </button>
               </div>
 
@@ -138,22 +158,42 @@ export default function App() {
                   <button
                     className={`px-3 py-2 rounded-lg border text-xs transition-all duration-200 ${
                       isEditing
-                        ? 'border-sky-500/50 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20'
-                        : 'border-slate-700/60 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-600'
+                        ? "border-sky-500/50 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20"
+                        : "border-slate-700/60 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-600"
                     }`}
                     onClick={handleEditData}
                   >
                     <span className="flex items-center gap-1.5">
                       {isEditing ? (
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       ) : (
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
                         </svg>
                       )}
-                      {isEditing ? 'Fermer' : 'Éditer'}
+                      {isEditing ? "Fermer" : "Éditer"}
                     </span>
                   </button>
                   <button
@@ -161,8 +201,18 @@ export default function App() {
                     onClick={handleNewCalculation}
                   >
                     <span className="flex items-center gap-1.5">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                        />
                       </svg>
                       Nouveau
                     </span>
@@ -179,32 +229,43 @@ export default function App() {
             <DataForm value={dataUi} onChange={setDataUi} onSolve={solve} />
           )}
 
-          {isSolved && mode === "pedagogique" && steps.length > 0 && !showFinalResult && (
-            <div className={isEditing ? "flex gap-4 items-start" : ""}>
-              <div className={isEditing ? "flex-1 min-w-0" : ""}>
-                <StepPlayer
-                  steps={steps}
-                  costs={dataUi.costs.map((r) => r.map((x) => Number(x)))}
-                  onComplete={() => setShowFinalResult(true)}
-                  calculateCurrentZ={calculateCurrentZ}
-                  isSteppingStoneStep={isSteppingStoneStep}
-                />
-              </div>
-              {isEditing && (
-                <div className="w-80 shrink-0 sticky top-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                  <DataForm value={dataUi} onChange={setDataUi} onSolve={solve} editMode onClose={() => setIsEditing(false)} />
+          {isSolved &&
+            mode === "pedagogique" &&
+            steps.length > 0 &&
+            !showFinalResult && (
+              <div className={isEditing ? "flex gap-4 items-start" : ""}>
+                <div className={isEditing ? "flex-1 min-w-0" : ""}>
+                  <StepPlayer
+                    steps={steps}
+                    costs={dataUi.costs.map((r) => r.map((x) => Number(x)))}
+                    onComplete={() => setShowFinalResult(true)}
+                    calculateCurrentZ={calculateCurrentZ}
+                    isSteppingStoneStep={isSteppingStoneStep}
+                  />
                 </div>
-              )}
-            </div>
-          )}
+                {isEditing && (
+                  <div className="w-80 shrink-0 sticky top-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+                    <DataForm
+                      value={dataUi}
+                      onChange={setDataUi}
+                      onSolve={solve}
+                      editMode
+                      onClose={() => setIsEditing(false)}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
-          {result && ((mode === "direct") || (mode === "pedagogique" && showFinalResult)) && (
-            <ResultPanel
-              basicSolution={result.basicSolution}
-              optimalSolution={result.allocation}
-              cost={result.cost}
-            />
-          )}
+          {result &&
+            (mode === "direct" ||
+              (mode === "pedagogique" && showFinalResult)) && (
+              <ResultPanel
+                basicSolution={result.basicSolution}
+                optimalSolution={result.allocation}
+                cost={result.cost}
+              />
+            )}
         </main>
       </div>
     </div>

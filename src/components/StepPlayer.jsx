@@ -272,7 +272,7 @@ export default function StepPlayer({ steps, costs, onComplete, calculateCurrentZ
             >
               <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-400 mb-3 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                Coûts Marginaux Δ(x,y)
+                Coûts Marginaux
               </h3>
 
               {/* All delta formulas overview */}
@@ -283,7 +283,7 @@ export default function StepPlayer({ steps, costs, onComplete, calculateCurrentZ
                   transition={{ delay: 0.2 }}
                 >
                   <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
-                    <p className="text-xs text-slate-400 mb-2">Calcul des coûts marginaux (cases non-basiques) :</p>
+                    <p className="text-xs text-slate-400 mb-2">Calcul des coûts marginaux:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 max-h-48 overflow-y-auto pr-1">
                       {step.deltaFormulas.map((item, idx) => (
                         <motion.p
@@ -313,10 +313,7 @@ export default function StepPlayer({ steps, costs, onComplete, calculateCurrentZ
                   transition={{ delay: 0.2 }}
                 >
                   <p className="text-xs text-emerald-300 mb-2 font-semibold flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Deltas négatifs détectés (améliorations possibles)
+                    Deltas négatifs détectés
                   </p>
                   <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
                     {step.negativeDeltas.map((item, idx) => (
@@ -355,14 +352,14 @@ export default function StepPlayer({ steps, costs, onComplete, calculateCurrentZ
                       cornerLabel="Δ"
                     />
                   </div>
-                  <div className="mt-2 flex items-start gap-2 p-2.5 rounded-lg bg-slate-900/40 border border-slate-700/40">
+                  {/* <div className="mt-2 flex items-start gap-2 p-2.5 rounded-lg bg-slate-900/40 border border-slate-700/40">
                     <svg className="w-3.5 h-3.5 text-slate-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <p className="text-xs text-slate-400">
                       "-" = case basique · Δ négatif = amélioration possible · Case jaune = variable entrante
                     </p>
-                  </div>
+                  </div> */}
                 </motion.div>
               )}
             </motion.div>

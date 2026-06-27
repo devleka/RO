@@ -1,11 +1,26 @@
 import react from "react";
 
-export default function countAllocations(alloc) {
-    let count = 0;
-    for (let i = 0; i < alloc.length; i++) {
-        for (let j = 0; j < alloc[0].length; j++) {
-            if (alloc[i][j] > 0) count++;
-        }
+/**
+ * Compte le nombre de variables de base (allocations)
+ * IMPORTANT : doit compter les "EPS" comme des allocations valides
+ */
+export default function countAllocations(allocation) {
+  if (!allocation || !Array.isArray(allocation)) return 0;
+
+  let count = 0;
+
+  for (let i = 0; i < allocation.length; i++) {
+    const row = allocation[i];
+    if (!Array.isArray(row)) continue;
+
+    for (let j = 0; j < row.length; j++) {
+      const val = row[j];
+      // Compte les nombres positifs ET les "EPS"
+      if (val === "EPS" || (typeof val === "number" && val > 0)) {
+        count++;
+      }
     }
-    return count;
+  }
+
+  return count;
 }

@@ -1,4 +1,4 @@
 import react from "react";
-export default function isBasic(x) {
-    return x === "EPS" || x > 0;
+export function isBasic(val) {
+  return val === "EPS" || (typeof val === "number" && val > 0);
 }
