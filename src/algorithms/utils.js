@@ -1,8 +1,3 @@
-/**
- * Utilitaires pour le problème de transport
- * Version corrigée et robuste de addEpsilon
- */
-
 export function isBasic(val) {
   return val === "EPS" || (typeof val === "number" && val > 0);
 }
@@ -24,7 +19,7 @@ export function computeDegrees(allocation) {
   return { rowCount, colCount };
 }
 
-/* ====================== Union-Find ====================== */
+/* Recherche des relations isolées */
 function makeFind(parent) {
   return function find(x) {
     if (parent[x] !== x) parent[x] = find(parent[x]);
@@ -40,14 +35,10 @@ function union(parent, x, y) {
   }
 }
 
-/**
- * Version robuste et correcte de addEpsilon
- * Utilise Union-Find pour détecter précisément les composantes
- */
 export function addEpsilon(allocation, steps, EPS, currentNb, m, n) {
   let nb = currentNb;
 
-  // Tant qu'on n'a pas assez de bases
+  // tant que le noombre d'allocation n'est pas suffisant
   while (nb < m + n - 1) {
     // === 1. Construire l'Union-Find ===
     const parent = {};
@@ -67,7 +58,7 @@ export function addEpsilon(allocation, steps, EPS, currentNb, m, n) {
       }
     }
 
-    // === 2. Trouver deux nœuds de composantes différentes ===
+    // Trouver deux nœuds de composantes différentes
     let added = false;
 
     // Chercher une cellule vide qui relie deux composantes différentes
@@ -78,7 +69,7 @@ export function addEpsilon(allocation, steps, EPS, currentNb, m, n) {
           const rootCol = find(m + j);
 
           if (rootRow !== rootCol) {
-            // Cette cellule connecte deux composantes différentes !
+            // Cette cellule connecte deux composantes différentes
             allocation[i][j] = EPS;
             steps.push({
               message: `Ajout ε en (${i},${j}) → connexion de composantes`,
@@ -92,7 +83,7 @@ export function addEpsilon(allocation, steps, EPS, currentNb, m, n) {
       }
     }
 
-    // === 3. Fallback si aucune connexion possible (très rare) ===
+    // si jamais y a aucune connexion possible (très rare)
     if (!added) {
       for (let i = 0; i < m && !added; i++) {
         for (let j = 0; j < n && !added; j++) {
@@ -110,7 +101,7 @@ export function addEpsilon(allocation, steps, EPS, currentNb, m, n) {
     }
 
     if (!added) {
-      // Impossible d'ajouter plus → on sort
+      // Impossible d'ajouter plus, on sort
       break;
     }
   }

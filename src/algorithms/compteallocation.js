@@ -1,9 +1,6 @@
 import react from "react";
 
-/**
- * Compte le nombre de variables de base (allocations)
- * IMPORTANT : doit compter les "EPS" comme des allocations valides
- */
+/* Compte le nombre de variables de base (allocations, EPS inclut) */
 export default function countAllocations(allocation) {
   if (!allocation || !Array.isArray(allocation)) return 0;
 

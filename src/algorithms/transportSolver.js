@@ -25,10 +25,10 @@ export function solveTransport(data) {
     nb = addEpsilon(allocation, steps, EPS, nb, m, n);
   }
 
-  // Save the basic solution (after MINITAB + epsilon, before Stepping-Stone)
+  // Enregistre la solution de base (après MINITAB + epsilon, avant Stepping-Stone)
   const basicSolution = JSON.parse(JSON.stringify(allocation));
 
-  // Add Z calculation step after MINITAB completes
+  // Ajoute l'étape de calcul de Z après la completion de MINITAB
   let baseCost = 0;
   let formulaParts = [];
 

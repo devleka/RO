@@ -18,7 +18,7 @@ export function steppingStone(costs, alloc, steps) {
       }
     }
 
-    // Track calculation steps for display
+    // Traquer la formule des potentiels
     let potentialFormulas = [];
 
     // On peut avoir plusieurs composantes (dégénérescence) : on relance avec une valeur arbitraire.
@@ -93,7 +93,7 @@ export function steppingStone(costs, alloc, steps) {
     let bestDelta = 0;
     let bestPos = null;
 
-    // Track delta calculations for display
+    // Traquer la formule des deltas
     let deltaFormulas = [];
 
     for (let i = 0; i < m; i++) {
@@ -103,7 +103,7 @@ export function steppingStone(costs, alloc, steps) {
           const deltaStr = Number(d.toFixed(2));
           delta[i][j] = deltaStr;
 
-          // Store formula for non-basic cells
+          // enregistrer les formules pour les cases non basiques
           deltaFormulas.push({
             row: i,
             col: j,
@@ -148,7 +148,7 @@ export function steppingStone(costs, alloc, steps) {
       formulas: deltaFormulas,
     } = computeDeltas(u, v);
 
-    // Single step with all deltas for overview
+    // affichage unique avec tous les deltas pour l'overview
     steps.push({
       message: "Calcul des coûts marginaux Δ(x,y)",
       table: JSON.parse(JSON.stringify(alloc)),
@@ -157,7 +157,7 @@ export function steppingStone(costs, alloc, steps) {
       deltaFormulas: deltaFormulas,
     });
 
-    // Step with negative deltas only
+    // étape avec seulement les deltas négatifs
     const negativeDeltas = deltaFormulas.filter((f) => f.value < 0);
     if (negativeDeltas.length > 0) {
       steps.push({
@@ -169,7 +169,7 @@ export function steppingStone(costs, alloc, steps) {
       });
     }
 
-    // Step with delta table
+    // étape avec seulement les deltas négatifs pour l'affichage
     steps.push({
       message: "Synthèse des coûts marginaux",
       table: JSON.parse(JSON.stringify(alloc)),
@@ -225,7 +225,7 @@ export function steppingStone(costs, alloc, steps) {
       ? 0
       : Math.min(...minus.map((c) => alloc[c.row][c.col]));
 
-    // Sequential marking steps: reveal one cycle cell at a time
+    // Marquage séquentiel
     for (let k = 0; k < bestCycle.length; k++) {
       const partialCycle = bestCycle.slice(0, k + 1);
       const sign = k % 2 === 0 ? "+" : "-";
@@ -245,11 +245,10 @@ export function steppingStone(costs, alloc, steps) {
       });
     }
 
-    // Apply substitution
+    // Appliquer la substitution
     if (theta === 0) {
-      // Degenerate pivot: "EPS" at a minus position means θ=ε≈0.
-      // Convert all "EPS" in the cycle to 0 (they leave the basis),
-      // then set the entering cell (index 0) to "EPS" to maintain m+n-1 basic cells.
+      // Convertir tous "EPS" dans le cycle en 0 (ils quittent la base),
+      // ensuite, mettre la cellule entrante (index 0) à "EPS" pour maintenir m+n-1 cellules de base.
       for (let k = 0; k < bestCycle.length; k++) {
         const c = bestCycle[k];
         if (alloc[c.row][c.col] === "EPS") {
