@@ -1,6 +1,7 @@
 import { minitab } from "./minitab.js";
 import { steppingStone } from "./steppingStone.js";
 import countAllocations from "./compteallocation.js";
+import { addEpsilon } from "./utils.js";
 
 export function solveTransport(data) {
   let steps = [];
@@ -21,10 +22,8 @@ export function solveTransport(data) {
 
   if (nb < m + n - 1) {
     // dégénérescence
-    console.log("cas de genrer", nb, " ", m, " ", n)
     nb = addEpsilon(allocation, steps, EPS, nb, m, n);
   }
-
 
   // Save the basic solution (after MINITAB + epsilon, before Stepping-Stone)
   const basicSolution = JSON.parse(JSON.stringify(allocation));
@@ -62,57 +61,6 @@ export function solveTransport(data) {
       const val = allocation[i][j] === "EPS" ? 0 : (allocation[i][j] || 0);
       cost += data.costs[i][j] * val;
     }
-  }
-
-  function computeDegrees(allocation) {
-    const m = allocation.length;
-    const n = allocation[0].length;
-
-    const rowCount = Array(m).fill(0);
-    const colCount = Array(n).fill(0);
-
-    for (let i = 0; i < m; i++) {
-      for (let j = 0; j < n; j++) {
-        if (allocation[i][j] > 0) {
-          rowCount[i]++;
-          colCount[j]++;
-        }
-      }
-    }
-
-    return { rowCount, colCount };
-  }
-
-  function findMinIndices(arr) {
-    const min = Math.min(...arr);
-    return arr
-      .map((v, i) => (v === min ? i : -1))
-      .filter(i => i !== -1);
-  }
-
-  function addEpsilon(allocation, steps, EPS, nb, m, n) {
-    const { rowCount, colCount } = computeDegrees(allocation);
-
-    const minRows = findMinIndices(rowCount);
-    const minCols = findMinIndices(colCount);
-
-    for (let i of minRows) {
-      for (let j of minCols) {
-        if (allocation[i][j] === 0) {
-          allocation[i][j] = EPS;
-
-          steps.push({
-            message: `Ajout ε en (${i},${j}) basé sur degré minimal`,
-            table: JSON.parse(JSON.stringify(allocation)),
-          });
-
-          nb++;
-          return nb; // on ajoute un seul epsilon
-        }
-      }
-    }
-
-    return nb;
   }
 
   return {
